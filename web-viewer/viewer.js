@@ -24,11 +24,9 @@ const urlParams = getUrlParams();
 const assetName = urlParams['name'] || 'image'; // Default to 'image' if no name is provided
 
 // Construct asset paths
-// Assuming a convention like assets/NAME.jpg and assets/NAME_mesh_data.json
 // Adjust this logic if your naming convention is different
-const imagePath = `./assets/${assetName}.jpg`;
-// const meshDataPath = `./assets/${assetName}_mesh_data.json`; // Old convention
-const meshDataPath = `./assets/${assetName}_mesh.json`; // Standardize on _mesh.json suffix
+const imagePath = `public/${assetName}.jpg`;
+const meshDataPath = `public/${assetName}_mesh.json`;
 
 // Start the application after init completes
 (async () => {

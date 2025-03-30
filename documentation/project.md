@@ -257,3 +257,74 @@ function animate() {
 ```
 
 *Note: The viewer code provides a basic structure. Implementing robust parallax, potentially using device orientation, and optimizing mesh generation/loading would be further steps.*
+
+## Deploying Web Viewer to GitHub Pages (Manual Method)
+
+This section outlines the manual steps to build the `web-viewer` project and deploy it to GitHub Pages.
+
+**Prerequisites:**
+
+*   Node.js and npm installed.
+*   Git installed.
+*   A GitHub repository for the project.
+*   The `base` property in `web-viewer/vite.config.js` set to `'/<your-repo-name>/'` (replace `<your-repo-name>` with your actual repository name).
+
+**Steps:**
+
+1.  **Navigate to the web-viewer directory:**
+    ```bash
+    cd path/to/your/project/web-viewer
+    ```
+
+2.  **Install Dependencies (if needed):**
+    ```bash
+    npm install
+    ```
+
+3.  **Build the Project:**
+    ```bash
+    npm run build
+    ```
+    This creates the `dist/` directory with static build artifacts.
+
+4.  **Navigate to the build output directory:**
+    ```bash
+    cd dist
+    ```
+
+5.  **Initialize Git & Commit (First time only):**
+    If this is the first deployment:
+    ```bash
+    git init
+    git checkout -b main # Use a temporary branch name, e.g., main
+    git add -A
+    git commit -m "Initial deployment"
+    git remote add origin git@github.com:<your-username>/<your-repo-name>.git # Replace with your repo URL
+    ```
+
+6.  **Push to `gh-pages` Branch:**
+    Force push the contents of `dist` to the `gh-pages` branch on GitHub. Replace `<your-username>` and `<your-repo-name>`.
+    ```bash
+    # Ensure you are inside the 'dist' directory!
+    # Push the temporary local 'main' branch to the remote 'gh-pages' branch
+    git push --force origin main:gh-pages
+    ```
+
+7.  **Subsequent Deployments:**
+    For future updates, after running `npm run build`:
+    ```bash
+    cd dist
+    git add -A
+    git commit -m "Deploy website update"
+    git push --force origin main:gh-pages
+    cd .. # Go back to the web-viewer directory
+    ```
+
+8.  **Configure GitHub Pages Settings:**
+    *   Go to your repository settings on GitHub.com.
+    *   Select the "Pages" tab.
+    *   Under "Build and deployment", choose "Deploy from a branch".
+    *   Select the `gh-pages` branch and the `/(root)` folder.
+    *   Save the changes.
+
+Your site should be available at `https://<your-username>.github.io/<your-repo-name>/` after a short delay.
