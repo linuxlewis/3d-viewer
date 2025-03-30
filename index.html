@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Image Gallery</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }
+        h1 { text-align: center; color: #333; }
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .gallery-item {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+        .gallery-item img {
+            display: block;
+            max-width: 200px; /* Adjust size as needed */
+            height: auto;
+            aspect-ratio: 1 / 1; /* Maintain square aspect ratio */
+            object-fit: cover; /* Cover the area without distortion */
+        }
+        .gallery-item p {
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>3D Image Gallery</h1>
+    <div class="gallery" id="gallery-container">
+        <!-- Gallery items will be added here by JavaScript -->
+        <p>Loading gallery...</p>
+    </div>
+
+    <script>
+        // In a real application, you'd fetch this list from a server
+        // or dynamically scan the 'assets' directory.
+        // For this example, we'll hardcode the known assets.
+        const availableImages = [
+            // { name: "image", imagePath: "./assets/image.jpg", meshPath: "./assets/mesh_data.json" } // Removed old entry
+            { name: "beach", imagePath: "public/beach.jpg", meshPath: "public/beach_mesh.json" },
+            { name: "cityscape", imagePath: "public/cityscape.jpg", meshPath: "public/cityscape_mesh.json" },
+            { name: "surreal", imagePath: "public/surreal.jpg", meshPath: "public/surreal_mesh_data.json" }
+        ];
+
+        const galleryContainer = document.getElementById('gallery-container');
+        galleryContainer.innerHTML = ''; // Clear loading message
+
+        if (availableImages.length === 0) {
+            galleryContainer.innerHTML = '<p>No images found in the gallery.</p>';
+        } else {
+            availableImages.forEach(imgData => {
+                const itemLink = document.createElement('a');
+                itemLink.href = `viewer.html?name=${encodeURIComponent(imgData.name)}`;
+                itemLink.classList.add('gallery-item');
+
+                const imgElement = document.createElement('img');
+                imgElement.src = imgData.imagePath;
+                imgElement.alt = `Preview of ${imgData.name}`;
+
+                const nameElement = document.createElement('p');
+                nameElement.textContent = imgData.name;
+
+                itemLink.appendChild(imgElement);
+                itemLink.appendChild(nameElement);
+                galleryContainer.appendChild(itemLink);
+            });
+        }
+    </script>
+</body>
+</html> 
