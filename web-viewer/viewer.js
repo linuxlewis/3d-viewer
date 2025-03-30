@@ -7,6 +7,29 @@ const target = new THREE.Vector2();
 const windowHalf = new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2);
 const loadingIndicator = document.getElementById('loading-indicator'); // Get loading indicator element
 
+// Function to get URL parameters
+function getUrlParams() {
+    const params = {};
+    const queryString = window.location.search.substring(1);
+    const regex = /([^&=]+)=([^&]*)/g;
+    let m;
+    while (m = regex.exec(queryString)) {
+        params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+    }
+    return params;
+}
+
+// Get the asset name from URL
+const urlParams = getUrlParams();
+const assetName = urlParams['name'] || 'image'; // Default to 'image' if no name is provided
+
+// Construct asset paths
+// Assuming a convention like assets/NAME.jpg and assets/NAME_mesh_data.json
+// Adjust this logic if your naming convention is different
+const imagePath = `./assets/${assetName}.jpg`;
+// const meshDataPath = `./assets/${assetName}_mesh_data.json`; // Old convention
+const meshDataPath = `./assets/${assetName}_mesh.json`; // Standardize on _mesh.json suffix
+
 // Start the application after init completes
 (async () => {
   try {
@@ -15,13 +38,16 @@ const loadingIndicator = document.getElementById('loading-indicator'); // Get lo
     animate();    // Start the animation loop *after* init is done
   } catch (error) {
     console.error("Failed to initialize viewer:", error);
-    if (loadingIndicator) loadingIndicator.textContent = 'Error loading experience. See console for details.'; // Update on error
+    if (loadingIndicator) {
+        loadingIndicator.textContent = `Error loading ${assetName}. See console for details.`; // Update on error
+        loadingIndicator.style.color = 'red';
+    }
     // Optionally, display an error message to the user on the page here
   }
 })();
 
 async function init() {
-    console.log("init started");
+    console.log(`init started for asset: ${assetName}`);
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x111111);
 
@@ -31,10 +57,10 @@ async function init() {
 
     try {
       // Load mesh data
-      console.log("Loading mesh data...");
-      const meshDataResponse = await fetch('./assets/mesh_data.json');
+      console.log(`Loading mesh data from ${meshDataPath}...`);
+      const meshDataResponse = await fetch(meshDataPath); // Use dynamic path
       if (!meshDataResponse.ok) {
-        throw new Error(`HTTP error! status: ${meshDataResponse.status}`);
+        throw new Error(`HTTP error loading mesh data! status: ${meshDataResponse.status}`);
       }
       const meshData = await meshDataResponse.json();
       console.log("Mesh data loaded:", meshData);
@@ -48,11 +74,11 @@ async function init() {
       console.log("Geometry created");
 
       // Load texture
-      console.log("Loading texture...");
+      console.log(`Loading texture from ${imagePath}...`);
       const textureLoader = new THREE.TextureLoader();
-      const texture = await textureLoader.loadAsync('./assets/image.jpg');
+      const texture = await textureLoader.loadAsync(imagePath); // Use dynamic path
       texture.colorSpace = THREE.SRGBColorSpace; // Important for correct colors
-      texture.flipY = false;
+      texture.flipY = false; // Keep flipY setting if needed
       console.log("Texture loaded:", texture);
 
       // Create material
@@ -75,11 +101,11 @@ async function init() {
       document.addEventListener('mousemove', onMouseMove);
       window.addEventListener('resize', onWindowResize);
       console.log("Event listeners added");
-      console.log("init finished successfully");
+      console.log(`init finished successfully for ${assetName}`);
 
     } catch (error) {
-        console.error("Error during asset loading or mesh creation:", error);
-        throw error;
+        console.error(`Error during asset loading or mesh creation for ${assetName}:`, error);
+        throw error; // Re-throw the error to be caught by the outer try-catch
     }
 }
 
