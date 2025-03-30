@@ -86,7 +86,7 @@ if __name__ == "__main__":
         "--shifts",
         type=int,
         nargs="+",
-        default=[-20, -10, 0, 10, 20],
+        default=[-60, -30, 0, 30, 60],
         help="List of horizontal shift amounts.",
     )
 
