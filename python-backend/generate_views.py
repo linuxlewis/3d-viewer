@@ -37,16 +37,35 @@ def shift_view(image_path, depth_path, output_dir, shifts):
     # Prepare meshgrid
     map_x_base, map_y = np.meshgrid(np.arange(w), np.arange(h))
     map_y = map_y.astype(np.float32)  # map_y remains constant
+    center_x = w / 2.0
+    # Calculate relative x coordinates (0 at center, +/- w/2 at edges)
+    relative_x = map_x_base.astype(np.float32) - center_x
+
+    # --- Perspective configuration ---
+    # Controls how much more pixels shift towards the edges compared to the center
+    # Adjust this value to control the 'convergence' effect. 0.0 = parallel shift.
+    perspective_strength = 0.3
+    logger.info(f"Using perspective strength: {perspective_strength}")
 
     logger.info(f"Generating {len(shifts)} shifted views...")
     for i, shift_amount in enumerate(shifts):
         logger.info(
             f"  Generating view {i+1}/{len(shifts)} with shift {shift_amount}..."
         )
-        # Calculate horizontal shift based on depth (closer pixels shift more)
         # Normalize depth to 0-1 range for shift calculation
         depth_normalized = depth / 255.0
-        map_x_shifted = map_x_base.astype(np.float32) + shift_amount * depth_normalized
+
+        # Calculate perspective scaling: 1.0 at center, >1.0 towards edges
+        # Avoid division by zero if width is very small (unlikely)
+        if center_x > 0:
+            perspective_scale = 1.0 + (np.abs(relative_x) / center_x) * perspective_strength
+        else:
+            perspective_scale = 1.0
+
+        # Calculate final horizontal shift incorporating depth and perspective
+        # Pixels further from the center (larger |relative_x|) will have their shift amplified
+        map_x_shifted = map_x_base.astype(np.float32) + \
+                        shift_amount * depth_normalized * perspective_scale
 
         # Remap the image using the shifted coordinates
         warped = cv2.remap(
@@ -67,11 +86,6 @@ def shift_view(image_path, depth_path, output_dir, shifts):
 
 
 if __name__ == "__main__":
-    # Logging is configured at the top level now
-    # logging.basicConfig(
-    #     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-    # )
-
     parser = argparse.ArgumentParser(
         description="Generate synthetic views using an image and its depth map."
     )
@@ -80,7 +94,11 @@ if __name__ == "__main__":
         "input_depth", type=str, help="Path to the input depth map file (grayscale)."
     )
     parser.add_argument(
-        "output_dir", type=str, help="Directory to save the generated views."
+        "-d",
+        "--output_dir",
+        type=str,
+        default="./views",
+        help="Directory to save the generated views. Defaults to './views'.",
     )
     parser.add_argument(
         "--shifts",

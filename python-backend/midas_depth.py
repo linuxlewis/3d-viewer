@@ -1,6 +1,7 @@
 # midas_depth.py
 import argparse
 import logging
+import os
 
 import cv2
 import numpy as np
@@ -82,10 +83,19 @@ if __name__ == "__main__":
     )
     parser.add_argument("input_image", type=str, help="Path to the input image file.")
     parser.add_argument(
-        "output_depth",
+        "-o",
+        "--output_path",
         type=str,
-        help="Path to save the output depth map (e.g., depth.png).",
+        default=None,
+        help="Path to save the output depth map (e.g., depth.png). Defaults to <input_image_name>_depth.png.",
     )
     args = parser.parse_args()
 
-    run_depth_estimation(args.input_image, args.output_depth)
+    # Determine the output path if not provided
+    output_path = args.output_path
+    if output_path is None:
+        base_name = os.path.splitext(args.input_image)[0]
+        output_path = f"{base_name}_depth.png"
+        logger.info(f"Output path not specified, defaulting to: {output_path}")
+
+    run_depth_estimation(args.input_image, output_path)
